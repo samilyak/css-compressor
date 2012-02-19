@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<project name="css-compressor" basedir="." default="build">
+
+  <property name="src.dir" value="${basedir}/src" />
+  <property name="lib.dir" value="${basedir}/lib" />
+  <property name="build.dir" value="${basedir}/build" />
+  <property name="classes.dir" value="${build.dir}/classes" />
+  <property name="project.name" value="css-compressor" />
+  <property name="project.version" value="0.1" />
+
+  <path id="my.classpath">
+    <fileset dir="${lib.dir}" includes="*.jar" />
+    <pathelement location="${src.dir}" />
+  </path>
+
+
+  <target name="clean">
+    <delete dir="${build.dir}" />
+  </target>
+
+
+  <target name="compile">
+    <mkdir dir="${classes.dir}" />
+
+    <javac
+      destdir="${classes.dir}"
+      classpathref="my.classpath"
+      debug="on"
+      deprecation="on"
+      source="1.5"
+      target="1.5"
+    >
+      <compilerarg value="-Werror"/>
+      <src path="${src.dir}" />
+    </javac>
+  </target>
+
+
+  <target name="jar" depends="compile">
+    <mkdir dir="${build.dir}" />
+
+    <jar destfile="${build.dir}/${project.name}-${project.version}.jar">
+      <zipgroupfileset dir="${lib.dir}" includes="*.jar" />
+      <fileset dir="${classes.dir}" />
+
+      <manifest>
+        <attribute
+          name="Main-Class" value="ru.artlebedev.csscompressor.Main"
+        />
+      </manifest>
+    </jar>
+  </target>
+
+
+  <target name="build" depends="jar" />
+
+
+  <target name="all" depends="clean, jar" />
+
+</project>

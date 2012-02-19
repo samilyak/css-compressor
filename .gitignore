@@ -1,0 +1,13 @@
+Thumbs.db
+.DS_Store
+*.log
+*.orig
+*.iml
+*.ipr
+*.iws
+CVS
+bak
+/.idea
+
+/build
+/test
