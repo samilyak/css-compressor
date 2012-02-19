@@ -22,7 +22,7 @@ public final class Main {
 
   private static void usage() {
     System.err.println("CSS Compressor");
-    System.err.println("Usage: java -jar css-compressor.jar config-file");
+    System.err.println("Usage: java -jar css-compressor.jar config-json-file");
   }
 
 }
