@@ -42,7 +42,7 @@ public class CssCompressor {
       // file path ending with '.css' in capturing subpattern 1
       // word characters, slashes, dash, underscore, dot,
       // colon and question mark (possible for absolute urls) are allowed
-      "([\\w\\\\/-_.:?]+?\\.css)" +
+      "([\\w\\\\/\\-_.:?]+?\\.css)" +
 
       // the rest of the line until semicolon or line break
       "[^;$]*?(;|$)",
