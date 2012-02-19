@@ -8,7 +8,7 @@
   <property name="build.dir" value="${basedir}/build" />
   <property name="classes.dir" value="${build.dir}/classes" />
   <property name="project.name" value="css-compressor" />
-  <property name="project.version" value="0.1" />
+
 
   <path id="my.classpath">
     <fileset dir="${lib.dir}" includes="*.jar" />
@@ -41,7 +41,7 @@
   <target name="jar" depends="compile">
     <mkdir dir="${build.dir}" />
 
-    <jar destfile="${build.dir}/${project.name}-${project.version}.jar">
+    <jar destfile="${build.dir}/${project.name}.jar">
       <zipgroupfileset dir="${lib.dir}" includes="*.jar" />
       <fileset dir="${classes.dir}" />
 
