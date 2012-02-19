@@ -1,0 +1,17 @@
+{
+
+  "modules": {
+    "module1": [
+      "input1-1.css",
+      "input1-2.css"
+    ],
+    "module2": "input2.css"
+  },
+
+  "root": "./src",
+
+  "output-path": "../min/%s.build.css",
+
+  "charset": "UTF-8"
+
+}

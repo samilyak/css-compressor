@@ -1,0 +1,5 @@
+@import "input1-imported.css";
+
+#header{
+  background: blue;
+}
