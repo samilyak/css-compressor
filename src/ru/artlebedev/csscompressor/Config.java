@@ -15,11 +15,16 @@ import com.google.gson.JsonObject;
 
 public class Config {
 
+  public static final String OUTPUT_WRAPPER_MARKER = "%output%";
+
+
   private String rootPath;
   
   private String charset;
 
   private String outputPath;
+  
+  private String outputWrapper;
 
   private ArrayList<Module> modules;
 
@@ -28,11 +33,13 @@ public class Config {
       String rootPath,
       String charset,
       String outputPath,
+      String outputWrapper,
       ArrayList<Module> modules){
     
     this.rootPath = rootPath;
     this.charset = charset;
     this.outputPath = outputPath;
+    this.outputWrapper = outputWrapper;
     this.modules = modules;
   }
 
@@ -52,11 +59,13 @@ public class Config {
     return outputPath;
   }
 
+  public String getOutputWrapper() {
+    return outputWrapper;
+  }
+
   public ArrayList<Module> getModules() {
     return modules;
   }
-
-
 
 
   public final static class Builder {
@@ -78,6 +87,8 @@ public class Config {
 
     private String outputPath;
 
+    private String outputWrapper;
+
     private ArrayList<Module> modules;
 
 
@@ -92,7 +103,12 @@ public class Config {
       buildOutputPath();
       buildModules();
 
-      return new Config(fullPathToRoot, charset, outputPath, modules);
+      return new Config(
+          fullPathToRoot,
+          charset,
+          outputPath,
+          outputWrapper,
+          modules);
     }
 
 
@@ -106,6 +122,10 @@ public class Config {
     
     public void setOutputPath(String outputPath) {
       outputPathRaw = outputPath;
+    }
+
+    public void setOutputWrapper(String outputWrapper) {
+      this.outputWrapper = outputWrapper;
     }
 
     public void setModulesInfo(JsonObject modulesInfo) {

@@ -7,13 +7,11 @@
 package ru.artlebedev.csscompressor;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,18 +68,31 @@ public class CssCompressor {
       outputCatalog.mkdirs();
 
       if (outputCatalog.exists()) {
-        OutputStreamWriter out = new OutputStreamWriter(
-            new FileOutputStream(module.getOutputPath()),
-            Charset.forName(config.getCharset()));
-
-        compressor.compress(out, -1);
-
-        out.close();
+        StringWriter stringWriter = new StringWriter();
+        compressor.compress(stringWriter, -1);
+        css = wrapCssWithOutputWrapper(stringWriter.toString());
+        Utils.writeToFile(module.getOutputPath(), css, config.getCharset());
       } else {
         throw new RuntimeException(
             "Unable to write to catalog " + outputCatalog.getPath());
       }
     }
+  }
+
+
+  private String wrapCssWithOutputWrapper(String css) {
+    if (config.getOutputWrapper() != null) {
+      if (config.getOutputWrapper().contains(Config.OUTPUT_WRAPPER_MARKER)) {
+        css = config.getOutputWrapper().replace(
+            Config.OUTPUT_WRAPPER_MARKER, css);
+      } else {
+        throw new RuntimeException(
+            "Option 'output-wrapper' did not contain placeholder: " +
+            Config.OUTPUT_WRAPPER_MARKER);
+      }
+    }
+
+    return css;
   }
 
 

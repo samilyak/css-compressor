@@ -32,6 +32,37 @@ public enum ConfigOption {
         }
       }),
 
+  OUTPUT_WRAPPER(
+      "output-wrapper",
+      new Updater(){
+        @Override
+        public void update(String outputWrapper, Config.Builder builder){
+          builder.setOutputWrapper(outputWrapper);
+        }
+
+        /**
+         * 'output-wrapper' can also be an array of strings that should be
+         * concatenated together.
+         */
+        @Override
+        public void update(
+            JsonArray outputWrapperParts, Config.Builder builder) {
+          
+          StringBuilder outputWrapper = new StringBuilder();
+          for (JsonElement item : outputWrapperParts) {
+            String part = Utils.toJsonStringOrNull(item);
+            if (part == null) {
+              throw new RuntimeException(
+                  "Some parts of array 'output-wrapper' are not string: " +
+                  item);
+            }
+
+            outputWrapper.append(part);
+          }
+          update(outputWrapper.toString(), builder);
+        }
+      }),
+  
   MODULES(
       "modules",
       new Updater(){

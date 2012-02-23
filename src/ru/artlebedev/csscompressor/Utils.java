@@ -7,8 +7,10 @@
 package ru.artlebedev.csscompressor;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -38,13 +40,36 @@ public class Utils {
       }
 
       return sb.toString();
-    }
-    finally {
-      fileStream.close();
+    } finally {
       inputStream.close();
+      fileStream.close();
     }
   }
 
+
+  public static void writeToFile(String path, String content)
+      throws IOException {
+
+    writeToFile(path, content, "UTF-8");
+  }
+
+  public static void writeToFile(
+      String path, String content, String charset) throws IOException {
+
+    FileOutputStream fileStream = new FileOutputStream(path);
+    OutputStreamWriter outputStream =
+        new OutputStreamWriter(fileStream, charset);
+    
+    try {
+      outputStream.write(content);
+    } finally {
+      outputStream.close();
+      fileStream.close();
+    }
+  }
+  
+  
+  
 
   /**
    * @return  If element is a JsonPrimitive that corresponds to a string, then
