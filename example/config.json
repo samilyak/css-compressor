@@ -12,6 +12,13 @@
 
   "output-path": "../min/%s.build.css",
 
+  "output-wrapper": [
+    "/*\n",
+    "  @copyright 2012 Super Company. All Rights Reserved.\n",
+    " */\n\n",
+    "%output%"
+  ],
+
   "charset": "UTF-8"
 
 }
