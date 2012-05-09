@@ -94,8 +94,10 @@ public class CssCompressor {
             Config.OUTPUT_WRAPPER_MARKER, css);
       } else {
         throw new RuntimeException(
-            "Option 'output-wrapper' did not contain placeholder: " +
-            Config.OUTPUT_WRAPPER_MARKER);
+            String.format(
+                "Option '%s' did not contain placeholder %s",
+                ConfigOption.OUTPUT_WRAPPER.getName(),
+                Config.OUTPUT_WRAPPER_MARKER));
       }
     }
 

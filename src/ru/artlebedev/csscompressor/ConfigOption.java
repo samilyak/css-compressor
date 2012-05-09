@@ -14,7 +14,7 @@ import com.google.gson.JsonPrimitive;
 public enum ConfigOption {
 
   ROOT(
-      "root",
+      "root", "string",
       new Updater(){
         @Override
         public void update(String rootPath, Config.Builder builder) {
@@ -24,7 +24,7 @@ public enum ConfigOption {
       "."), // relative to location of config json file
 
   OUTPUT_PATH(
-      "output-path",
+      "output-path", "string",
       new Updater(){
         @Override
         public void update(String outputPath, Config.Builder builder){
@@ -33,7 +33,7 @@ public enum ConfigOption {
       }),
 
   OUTPUT_WRAPPER(
-      "output-wrapper",
+      "output-wrapper", "string or array",
       new Updater(){
         @Override
         public void update(String outputWrapper, Config.Builder builder){
@@ -41,7 +41,7 @@ public enum ConfigOption {
         }
 
         /**
-         * 'output-wrapper' can also be an array of strings that should be
+         * output-wrapper can also be an array of strings that should be
          * concatenated together.
          */
         @Override
@@ -53,8 +53,9 @@ public enum ConfigOption {
             String part = Utils.jsonElementToStringOrNull(item);
             if (part == null) {
               throw new RuntimeException(
-                  "Some parts of array 'output-wrapper' are not string: " +
-                  item);
+                  String.format(
+                      "Some parts of array '%s' are not string: %s",
+                      ConfigOption.OUTPUT_WRAPPER.getName(), item));
             }
 
             outputWrapper.append(part);
@@ -64,7 +65,7 @@ public enum ConfigOption {
       }),
   
   MODULES(
-      "modules",
+      "modules", "object",
       new Updater(){
         @Override
         public void update(JsonObject modules, Config.Builder builder){
@@ -73,7 +74,7 @@ public enum ConfigOption {
       }),
 
   CHARSET(
-      "charset",
+      "charset", "string",
       new Updater(){
         @Override
         public void update(String charset, Config.Builder builder){
@@ -87,23 +88,35 @@ public enum ConfigOption {
 
   private final String name;
 
+  private final String allowedTypes;
+
   private final Updater updater;
   
   private final String defaultValue;
 
 
-  ConfigOption(String name, Updater updater) {
-    this(name, updater, null);
+  ConfigOption(String name, String allowedTypes, Updater updater) {
+    this(name, allowedTypes, updater, null);
   }
 
-  ConfigOption(String name, Updater updater, String defaultValue) {
+  ConfigOption(
+      String name, String allowedTypes, Updater updater, String defaultValue) {
+
     this.name = name;
+    this.allowedTypes = allowedTypes;
     this.updater = updater;
     this.defaultValue = defaultValue;
+
+    this.updater.setOptionName(name);
+    this.updater.setOptionAllowedTypes(allowedTypes);
   }
 
   public String getName() {
     return name;
+  }
+
+  public String getAllowedTypes() {
+    return allowedTypes;
   }
 
   public String getDefaultValue() {
@@ -118,24 +131,29 @@ public enum ConfigOption {
 
   private static class Updater {
 
+    private String optionName;
+
+    private String optionAllowedTypes;
+
+
     public void update(boolean value, Config.Builder builder) {
-      throw new UnsupportedOperationException();
+      throwExceptionOnOptionWrongType(Boolean.toString(value));
     }
 
     public void update(Number value, Config.Builder builder) {
-      throw new UnsupportedOperationException();
+      throwExceptionOnOptionWrongType(value.toString());
     }
 
     public void update(String value, Config.Builder builder) {
-      throw new UnsupportedOperationException();
+      throwExceptionOnOptionWrongType(value);
     }
 
     public void update(JsonArray value, Config.Builder builder) {
-      throw new UnsupportedOperationException();
+      throwExceptionOnOptionWrongType(value.toString());
     }
 
     public void update(JsonObject value, Config.Builder builder) {
-      throw new UnsupportedOperationException();
+      throwExceptionOnOptionWrongType(value.toString());
     }
 
     private void update(JsonElement jsonElement, Config.Builder builder) {
@@ -156,6 +174,20 @@ public enum ConfigOption {
       }
     }
 
+    public void setOptionName(String name) {
+      this.optionName = name;
+    }
+
+    public void setOptionAllowedTypes(String types) {
+      this.optionAllowedTypes = types;
+    }
+
+    private void throwExceptionOnOptionWrongType(String jsonElementValue) {
+      throw new IllegalArgumentException(
+          String.format(
+              "Option '%s' must be %s. Found: %s",
+              this.optionName, this.optionAllowedTypes, jsonElementValue));
+    }
   }
 
 }
