@@ -1,11 +1,16 @@
 {
 
   "modules": {
-    "module1": [
-      "input1-1.css",
-      "input1-2.css"
-    ],
-    "module2": "input2.css"
+
+    "module1": ["input1-1.css", "input1-2.css"],
+
+    "module2": "input2.css",
+
+    "module3": {
+      "inputs": "input3.css",
+      "output": "../min/custom-module3-build.css"
+    }
+
   },
 
   "root": "./src",
