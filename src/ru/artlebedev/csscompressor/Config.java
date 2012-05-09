@@ -8,6 +8,7 @@ package ru.artlebedev.csscompressor;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gson.JsonElement;
@@ -22,23 +23,19 @@ public class Config {
   
   private String charset;
 
-  private String outputPath;
-  
   private String outputWrapper;
 
-  private ArrayList<Module> modules;
+  private List<Module> modules;
 
   
   private Config(
       String rootPath,
       String charset,
-      String outputPath,
       String outputWrapper,
-      ArrayList<Module> modules){
+      List<Module> modules){
     
     this.rootPath = rootPath;
     this.charset = charset;
-    this.outputPath = outputPath;
     this.outputWrapper = outputWrapper;
     this.modules = modules;
   }
@@ -47,7 +44,7 @@ public class Config {
     return new Builder(configFilePath);
   }
 
-  public String getRootPath(){
+  public String getRootPath() {
     return rootPath;
   }
 
@@ -55,15 +52,11 @@ public class Config {
     return charset;
   }
 
-  public String getOutputPath() {
-    return outputPath;
-  }
-
   public String getOutputWrapper() {
     return outputWrapper;
   }
 
-  public ArrayList<Module> getModules() {
+  public List<Module> getModules() {
     return modules;
   }
 
@@ -85,28 +78,24 @@ public class Config {
     
     private String charset;
 
-    private String outputPath;
-
     private String outputWrapper;
 
-    private ArrayList<Module> modules;
+    private List<Module> modules;
 
 
     private Builder(String configFilePath) {
-      this.configFileCatalog = new File(configFilePath).getParent();
+      configFileCatalog = new File(configFilePath).getParent();
     }
 
 
     public Config build() {
       buildFullPathToRoot();
       buildCharset();
-      buildOutputPath();
       buildModules();
 
       return new Config(
           fullPathToRoot,
           charset,
-          outputPath,
           outputWrapper,
           modules);
     }
@@ -148,17 +137,6 @@ public class Config {
           ConfigOption.CHARSET.getDefaultValue();
     }
 
-    private void buildOutputPath() {
-      if (outputPathRaw == null) {
-        throw new RuntimeException(
-            "Option '" + ConfigOption.OUTPUT_PATH.getName() + "' " +
-            "is required.");
-      }
-
-      outputPath = calculateFullPath(outputPathRaw);
-    }
-    
-
     private void buildModules() {
       if (modulesInfoRaw == null) {
         throw new RuntimeException(
@@ -167,50 +145,106 @@ public class Config {
       }
 
 
-      ArrayList<Module> modules = new ArrayList<Module>();
+      List<Module> modules = new ArrayList<Module>();
       
-      for (
-          Map.Entry<String, JsonElement> moduleInfo :
+      for (Map.Entry<String, JsonElement> moduleData :
           modulesInfoRaw.entrySet()) {
 
-        String name = moduleInfo.getKey();
-        JsonElement inputs = moduleInfo.getValue();
-        ArrayList<String> inputsAsList = new ArrayList<String>();
+        String name = moduleData.getKey();
+        JsonElement info = moduleData.getValue();
 
-        String str = Utils.toJsonStringOrNull(inputs);
-        if (str != null) {
-          inputsAsList.add(calculateFullPath(str));
-        } else {
-          if (!inputs.isJsonArray()) {
+
+        List<String> inputs;
+        String output;
+
+        if (Utils.isJsonString(info) || info.isJsonArray()) {
+          inputs = extractModuleInputs(info);
+          output = null;
+
+        } else if (info.isJsonObject()) {
+          JsonObject infoAsObject = info.getAsJsonObject();
+
+          JsonElement inputsData = infoAsObject.get("inputs");
+          if (inputsData == null) {
             throw new IllegalArgumentException(
-                "Module inputs must be either a single string, " +
-                "or an array of strings, but was: " + inputs);
+                "Module '" + name + "' must specify inputs " +
+                    "using \"inputs\" key. Found: " + inputsData);
+          }
+          inputs = extractModuleInputs(inputsData);
+
+          JsonElement outputRaw = infoAsObject.get("output");
+          if (outputRaw != null && !Utils.isJsonString(outputRaw)) {
+            throw new IllegalArgumentException(
+                "Output of module '" + name + "' must be a string. Found: " +
+                    outputRaw);
           }
 
-          for (JsonElement element : inputs.getAsJsonArray()) {
-            String elementAsString = Utils.toJsonStringOrNull(element);
-            if (elementAsString == null) {
-              throw new IllegalArgumentException(
-                  "Module inputs contained an element " +
-                  "that was not a string literal: " + element);
-            }
+          output = Utils.jsonElementToStringOrNull(outputRaw);
 
-            inputsAsList.add(calculateFullPath(elementAsString));
-          }
+        } else {
+          throw new IllegalArgumentException(
+              "Module info must be either a single string, " +
+                  "an array of strings, or an object. Found: " + info);
         }
 
         modules.add(
-            new Module(name, inputsAsList, moduleNameToOutputPath(name)));
+            new Module(name, inputs, getModuleOutputPath(name, output)));
       }
 
       this.modules = modules;
     }
 
-    
-    private String moduleNameToOutputPath(String moduleName) {
-      return String.format(this.outputPath, moduleName);
+
+    private List<String> extractModuleInputs(JsonElement element) {
+      List<String> inputs = new ArrayList<String>();
+
+      if (Utils.isJsonString(element)) {
+        inputs.add(
+            calculateFullPath(element.getAsString()));
+
+      } else if (element.isJsonArray()) {
+        for (JsonElement input : element.getAsJsonArray()) {
+          String str = Utils.jsonElementToStringOrNull(input);
+
+          if (str == null) {
+            throw new IllegalArgumentException(
+                "Module inputs contained an element " +
+                    "that was not a string literal: " + input);
+          }
+
+          inputs.add(calculateFullPath(str));
+        }
+      } else {
+        throw new IllegalArgumentException(
+            "Module inputs must be either a single string, " +
+                "or an array of strings. Found: " + element);
+      }
+
+      return inputs;
     }
-    
+
+
+    private String getModuleOutputPath(String moduleName, String moduleOutput) {
+      if (moduleOutput == null && outputPathRaw == null) {
+        throw new IllegalArgumentException(
+            String.format(
+                "Module '%s' didn't have output path. " +
+                "You must specify output path either by global key '%s' or " +
+                "by module own object key 'output' containing string value.",
+                moduleName,
+                ConfigOption.OUTPUT_PATH.getName())
+        );
+      }
+
+      if (moduleOutput == null) {
+        moduleOutput = outputPathRaw;
+      }
+
+      return calculateFullPath(
+          String.format(moduleOutput, moduleName));
+    }
+
+
     private String calculateFullPath(String path) {
       return new File(fullPathToRoot, path).getPath();
     }
@@ -220,27 +254,16 @@ public class Config {
 
   public final static class Module {
 
-    private final String name;
-    private final ArrayList<String> inputs;
-    private final String outputPath;
+    final String name;
+    final List<String> inputs;
+    final String outputPath;
 
-    private Module(String name, ArrayList<String> inputs, String outputPath) {
+    private Module(String name, List<String> inputs, String outputPath) {
       this.name = name;
       this.inputs = inputs;
       this.outputPath = outputPath;
     }
 
-    public String getName() {
-      return name;
-    }
-
-    public ArrayList<String> getInputs() {
-      return inputs;
-    }
-
-    public String getOutputPath() {
-      return outputPath;
-    }
   }
 
 }

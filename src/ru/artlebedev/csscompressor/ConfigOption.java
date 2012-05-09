@@ -50,7 +50,7 @@ public enum ConfigOption {
           
           StringBuilder outputWrapper = new StringBuilder();
           for (JsonElement item : outputWrapperParts) {
-            String part = Utils.toJsonStringOrNull(item);
+            String part = Utils.jsonElementToStringOrNull(item);
             if (part == null) {
               throw new RuntimeException(
                   "Some parts of array 'output-wrapper' are not string: " +

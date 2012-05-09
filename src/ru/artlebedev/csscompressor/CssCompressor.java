@@ -13,6 +13,7 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,28 +58,34 @@ public class CssCompressor {
 
   public void compress() throws IOException {
     for (Config.Module module : config.getModules()) {
-      String css = concatCssFiles(module.getInputs());
+      prepareModuleOutputCatalog(module);
+
+      String css = concatCssFiles(module.inputs);
 
       com.yahoo.platform.yui.compressor.CssCompressor compressor =
           new com.yahoo.platform.yui.compressor.CssCompressor(
               new StringReader(css));
 
+      StringWriter stringWriter = new StringWriter();
+      compressor.compress(stringWriter, -1);
+      css = wrapCssWithOutputWrapper(stringWriter.toString());
+      Utils.writeToFile(module.outputPath, css, config.getCharset());
+    }
+  }
 
-      File outputCatalog = new File(module.getOutputPath()).getParentFile();
+  private void prepareModuleOutputCatalog(Config.Module module) {
+    File outputCatalog = new File(module.outputPath).getParentFile();
+    if (outputCatalog != null) {
+      // null means outputPath doesn't contain catalog part, just filename -
+      // it's OK, we'll write to current catalog
+
       outputCatalog.mkdirs();
-
-      if (outputCatalog.exists()) {
-        StringWriter stringWriter = new StringWriter();
-        compressor.compress(stringWriter, -1);
-        css = wrapCssWithOutputWrapper(stringWriter.toString());
-        Utils.writeToFile(module.getOutputPath(), css, config.getCharset());
-      } else {
+      if (!outputCatalog.exists()) {
         throw new RuntimeException(
             "Unable to write to catalog " + outputCatalog.getPath());
       }
     }
   }
-
 
   private String wrapCssWithOutputWrapper(String css) {
     if (config.getOutputWrapper() != null) {
@@ -96,11 +103,11 @@ public class CssCompressor {
   }
 
 
-  private String concatCssFiles(ArrayList<String> paths)
+  private String concatCssFiles(List<String> paths)
       throws IOException {
 
     StringBuilder stringResult = new StringBuilder();
-    ArrayList<String> processedFiles = new ArrayList<String>(0);
+    List<String> processedFiles = new ArrayList<String>(0);
 
     for (String path : paths) {
       CssProcessingResult pathProcessingResult =
@@ -115,7 +122,7 @@ public class CssCompressor {
 
 
   private CssProcessingResult processCssFile(
-      String path, ArrayList<String> processedFiles) throws IOException {
+      String path, List<String> processedFiles) throws IOException {
     /*
       We need to prevent from processing same files more than once,
       to minify result build file and more importantly to avoid cyclic imports.
@@ -173,15 +180,17 @@ public class CssCompressor {
 
 
   private final static class CssProcessingResult {
-    String content;
-    ArrayList<String> processedFiles;
+
+    final String content;
+    final List<String> processedFiles;
 
     public CssProcessingResult(
-        String content, ArrayList<String> processedFiles){
+        String content, List<String> processedFiles){
 
       this.content = content;
       this.processedFiles = processedFiles;
     }
+
   }
 
 }

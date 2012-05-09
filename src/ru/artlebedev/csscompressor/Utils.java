@@ -13,7 +13,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 
 
 public class Utils {
@@ -75,17 +74,17 @@ public class Utils {
    * @return  If element is a JsonPrimitive that corresponds to a string, then
    *          return the value of that string; otherwise, return null.
    */
-  public static String toJsonStringOrNull(JsonElement element) {
-    if (element == null) {
+  public static String jsonElementToStringOrNull(JsonElement element) {
+    if (element == null || element.isJsonNull() || !isJsonString(element)) {
       return null;
     }
-    if (element.isJsonPrimitive()) {
-      JsonPrimitive primitive = element.getAsJsonPrimitive();
-      if (primitive.isString()) {
-        return primitive.getAsString();
-      }
-    }
-    return null;
+
+    return element.getAsString();
+  }
+
+
+  public static boolean isJsonString (JsonElement element) {
+    return element.isJsonPrimitive() && element.getAsJsonPrimitive().isString();
   }
 
 }
