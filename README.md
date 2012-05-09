@@ -71,9 +71,12 @@ A definition can be either a string, an array of strings, or an object:
 All paths are relative to global option `root`.
 
 <br />
-`output-path` **string**, required <br />
+`output-path` **string**, required if some modules are in format 1 or 2
+(see above) <br />
 A mask using for creating output path for result modules build files.
-%s will be replaced with module name from `modules` option.
+%s will be replaced with module name from `modules` option. This option is
+required for modules whose definition is either a string,
+or an array of strings (that don't have its own output).
 This path is relative to `root` option.
 
 <br />
