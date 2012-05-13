@@ -17,7 +17,7 @@ java -jar css-compressor.jar config-json-file
 
 Example of a config-json-file containing all possible options:
 
-```
+```json
 {
 
   "modules": {
