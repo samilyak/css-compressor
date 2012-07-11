@@ -118,7 +118,7 @@ public class CssCompressor {
       stringResult.append(pathProcessingResult.content);
       processedFiles = pathProcessingResult.processedFiles;
     }
-    
+
     return stringResult.toString();
   }
 
@@ -158,7 +158,16 @@ public class CssCompressor {
         importFileContent = importProcessingResult.content;
       }
 
-      matcher.appendReplacement(stringResult, importFileContent);
+      /**
+       * Do it like that (rather than simply
+       * matcher.appendReplacement(stringResult, importFileContent))
+       * because appendReplacement() is treating symbols \ and $ in its
+       * 2nd argument in a special regex specific way.
+       * So we need to avoid problem when source css
+       * content:'\2014\a0' is converted to content:'2014a0'
+       */
+      matcher.appendReplacement(stringResult, "");
+      stringResult.append(importFileContent);
     }
     matcher.appendTail(stringResult);
 
