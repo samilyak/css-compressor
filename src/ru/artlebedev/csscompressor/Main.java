@@ -16,8 +16,8 @@ public final class Main {
       System.exit(1);
     }
 
-    Config config = ConfigParser.parse(args[0]);
-    new CssCompressor(config).compress();
+    ConfigBuilder builder = new ConfigBuilder(args[0]);
+    new CssCompressor(builder.build()).compress();
   }
 
   private static void usage() {

@@ -17,7 +17,7 @@ public enum ConfigOption {
       "root", "string",
       new Updater(){
         @Override
-        public void update(String rootPath, Config.Builder builder) {
+        public void update(String rootPath, ConfigBuilder builder) {
           builder.setRootPath(rootPath);
         }
       },
@@ -27,7 +27,7 @@ public enum ConfigOption {
       "output-path", "string",
       new Updater(){
         @Override
-        public void update(String outputPath, Config.Builder builder){
+        public void update(String outputPath, ConfigBuilder builder){
           builder.setOutputPath(outputPath);
         }
       }),
@@ -36,7 +36,7 @@ public enum ConfigOption {
       "output-wrapper", "string or array",
       new Updater(){
         @Override
-        public void update(String outputWrapper, Config.Builder builder){
+        public void update(String outputWrapper, ConfigBuilder builder){
           builder.setOutputWrapper(outputWrapper);
         }
 
@@ -46,7 +46,7 @@ public enum ConfigOption {
          */
         @Override
         public void update(
-            JsonArray outputWrapperParts, Config.Builder builder) {
+            JsonArray outputWrapperParts, ConfigBuilder builder) {
           
           StringBuilder outputWrapper = new StringBuilder();
           for (JsonElement item : outputWrapperParts) {
@@ -68,7 +68,7 @@ public enum ConfigOption {
       "modules", "object",
       new Updater(){
         @Override
-        public void update(JsonObject modules, Config.Builder builder){
+        public void update(JsonObject modules, ConfigBuilder builder){
           builder.setModulesInfo(modules);
         }
       }),
@@ -77,7 +77,7 @@ public enum ConfigOption {
       "charset", "string",
       new Updater(){
         @Override
-        public void update(String charset, Config.Builder builder){
+        public void update(String charset, ConfigBuilder builder){
           builder.setCharset(charset);
         }
       },
@@ -123,7 +123,7 @@ public enum ConfigOption {
     return defaultValue;
   }
 
-  public void update(JsonElement jsonElement, Config.Builder builder) {
+  public void update(JsonElement jsonElement, ConfigBuilder builder) {
     updater.update(jsonElement, builder);
   }
 
@@ -136,27 +136,27 @@ public enum ConfigOption {
     private String optionAllowedTypes;
 
 
-    public void update(boolean value, Config.Builder builder) {
+    public void update(boolean value, ConfigBuilder builder) {
       throwExceptionOnOptionWrongType(Boolean.toString(value));
     }
 
-    public void update(Number value, Config.Builder builder) {
+    public void update(Number value, ConfigBuilder builder) {
       throwExceptionOnOptionWrongType(value.toString());
     }
 
-    public void update(String value, Config.Builder builder) {
+    public void update(String value, ConfigBuilder builder) {
       throwExceptionOnOptionWrongType(value);
     }
 
-    public void update(JsonArray value, Config.Builder builder) {
+    public void update(JsonArray value, ConfigBuilder builder) {
       throwExceptionOnOptionWrongType(value.toString());
     }
 
-    public void update(JsonObject value, Config.Builder builder) {
+    public void update(JsonObject value, ConfigBuilder builder) {
       throwExceptionOnOptionWrongType(value.toString());
     }
 
-    private void update(JsonElement jsonElement, Config.Builder builder) {
+    private void update(JsonElement jsonElement, ConfigBuilder builder) {
       if (jsonElement.isJsonPrimitive()) {
         JsonPrimitive primitive = jsonElement.getAsJsonPrimitive();
 
