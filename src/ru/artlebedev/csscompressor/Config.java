@@ -22,17 +22,21 @@ class Config {
 
   private List<Module> modules;
 
+  private List<Replace> replaces;
+
   
   Config(
       String rootPath,
       String charset,
       String outputWrapper,
-      List<Module> modules){
+      List<Module> modules,
+      List<Replace> replaces){
     
     this.rootPath = rootPath;
     this.charset = charset;
     this.outputWrapper = outputWrapper;
     this.modules = modules;
+    this.replaces = replaces;
   }
 
   public String getRootPath() {
@@ -51,6 +55,9 @@ class Config {
     return modules;
   }
 
+  public List<Replace> getReplaces() {
+    return replaces;
+  }
 
 
   final static class Module {
@@ -63,6 +70,19 @@ class Config {
       this.name = name;
       this.inputs = inputs;
       this.outputPath = outputPath;
+    }
+
+  }
+
+
+  final static class Replace {
+
+    final String search;
+    final String replacement;
+
+    Replace(String search, String replacement) {
+      this.search = search;
+      this.replacement = replacement;
     }
 
   }

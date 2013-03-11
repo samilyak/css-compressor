@@ -10,6 +10,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import org.apache.commons.cli.CommandLine;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,6 +22,11 @@ import java.util.Set;
 
 
 class ConfigBuilder {
+
+  private final String REPLACE_SPLITTER = "::";
+
+
+  private final CommandLine cmdLine;
 
   private String configFilePath;
 
@@ -34,23 +41,25 @@ class ConfigBuilder {
   private String outputWrapper;
 
 
-  ConfigBuilder(String configFilePath) {
-    this.configFilePath = configFilePath;
+  ConfigBuilder(CommandLine cmdLine) {
+    this.cmdLine = cmdLine;
+    configFilePath = cmdLine.getArgs()[0];
   }
 
 
   public Config build() throws IOException {
-    parse();
+    parseConfigFile();
 
     return new Config(
         getRootFullPath(),
         getCharset(),
         outputWrapper,
-        getModules());
+        getModules(),
+        getReplaces());
   }
 
 
-  private void parse() throws IOException {
+  private void parseConfigFile() throws IOException {
     JsonElement root = new JsonParser().parse(Utils.readFile(configFilePath));
 
     if (!root.isJsonObject()) {
@@ -237,6 +246,31 @@ class ConfigBuilder {
 
     return calculateFullPath(
         String.format(moduleOutput, moduleName));
+  }
+
+
+  private List<Config.Replace> getReplaces() {
+    String[] replaces = cmdLine.getOptionValues("replace");
+    List<Config.Replace> processedReplaces = new ArrayList<Config.Replace>();
+
+    if (replaces != null) {
+      for (String replaceStr : replaces) {
+        if (replaceStr.contains(REPLACE_SPLITTER)) {
+          String[] split = replaceStr.split(REPLACE_SPLITTER, 2);
+          processedReplaces.add(
+              new Config.Replace(split[0], split[1]));
+
+          System.out.println("Replace: " + split[0] + " => " +  split[1]);
+        } else {
+          throw new RuntimeException(
+              String.format(
+                  "Replace '%s' did not contain splitter '%s'",
+                  replaceStr, REPLACE_SPLITTER));
+        }
+      }
+    }
+
+    return processedReplaces;
   }
 
 

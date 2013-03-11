@@ -9,11 +9,21 @@ will be concatenated in one file that will be compressed with CSS part of
 YUI Compressor.
 
 
-Basic usage:
+Usage:
 
 ```
-java -jar css-compressor.jar config-json-file
+java -jar css-compressor.jar [options] config-json-file
+  -h,--help                           print this message
+  --replace <regex-search::replace>   String replacement performing on a result css string. This argument's value must
+                                      contain :: as a delimiter between search and replace portions. Be aware that
+                                      <regex-search> is a regex pattern, so regex special chars escaping is up to you.
+                                      $1, $2,.. in a <replace> portion are links to groups in a regex pattern.
+                                      You can use this option many times.
 ```
+
+--replace command line option is useful for example when you want to append
+revision to css background urls. This is a command line option rather than
+a config file option to allow generate search::replace string dynamically.
 
 Example of a config-json-file containing all possible options:
 

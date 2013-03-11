@@ -68,7 +68,11 @@ public class CssCompressor {
 
       StringWriter stringWriter = new StringWriter();
       compressor.compress(stringWriter, -1);
-      css = wrapCssWithOutputWrapper(stringWriter.toString());
+      css = stringWriter.toString();
+
+      css = applyReplaces(css);
+      css = wrapCssWithOutputWrapper(css);
+
       Utils.writeToFile(module.outputPath, css, config.getCharset());
     }
   }
@@ -87,24 +91,6 @@ public class CssCompressor {
     }
   }
 
-  private String wrapCssWithOutputWrapper(String css) {
-    if (config.getOutputWrapper() != null) {
-      if (config.getOutputWrapper().contains(Config.OUTPUT_WRAPPER_MARKER)) {
-        css = config.getOutputWrapper().replace(
-            Config.OUTPUT_WRAPPER_MARKER, css);
-      } else {
-        throw new RuntimeException(
-            String.format(
-                "Option '%s' did not contain placeholder %s",
-                ConfigOption.OUTPUT_WRAPPER.getName(),
-                Config.OUTPUT_WRAPPER_MARKER));
-      }
-    }
-
-    return css;
-  }
-
-
   private String concatCssFiles(List<String> paths)
       throws IOException {
 
@@ -120,6 +106,37 @@ public class CssCompressor {
     }
 
     return stringResult.toString();
+  }
+
+
+  private String applyReplaces(String css) {
+    List<Config.Replace> replaces = config.getReplaces();
+
+    if (replaces != null) {
+      for (Config.Replace replace : replaces) {
+        css = css.replaceAll(replace.search, replace.replacement);
+      }
+    }
+
+    return css;
+  }
+
+
+  private String wrapCssWithOutputWrapper(String css) {
+    if (config.getOutputWrapper() != null) {
+      if (config.getOutputWrapper().contains(Config.OUTPUT_WRAPPER_MARKER)) {
+        css = config.getOutputWrapper().replace(
+            Config.OUTPUT_WRAPPER_MARKER, css);
+      } else {
+        throw new RuntimeException(
+            String.format(
+                "Option '%s' did not contain placeholder %s",
+                ConfigOption.OUTPUT_WRAPPER.getName(),
+                Config.OUTPUT_WRAPPER_MARKER));
+      }
+    }
+
+    return css;
   }
 
 
