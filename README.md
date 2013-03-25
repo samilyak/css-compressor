@@ -14,6 +14,7 @@ Usage:
 ```
 java -jar css-compressor.jar [options] config-json-file
   -h,--help                           print this message
+  --quiet                             do not print service messages to stdout (like preprocessing commands)
   --replace <regex-search::replace>   String replacement performing on a result css string. This argument's value must
                                       contain :: as a delimiter between search and replace portions. Be aware that
                                       <regex-search> is a regex pattern, so regex special chars escaping is up to you.

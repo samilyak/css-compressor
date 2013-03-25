@@ -26,6 +26,8 @@ class Config {
 
   private String preprocessCommand;
 
+  private boolean quiet;
+
   
   Config(
       String rootPath,
@@ -33,14 +35,16 @@ class Config {
       String outputWrapper,
       List<Module> modules,
       List<Replace> replaces,
-      String preprocessCommand){
-    
+      String preprocessCommand,
+      boolean quiet){
+
     this.rootPath = rootPath;
     this.charset = charset;
     this.outputWrapper = outputWrapper;
     this.modules = modules;
     this.replaces = replaces;
     this.preprocessCommand = preprocessCommand;
+    this.quiet = quiet;
   }
 
   public String getRootPath() {
@@ -65,6 +69,10 @@ class Config {
 
   public String getPreprocessCommand() {
     return preprocessCommand;
+  }
+
+  public boolean isQuiet() {
+    return quiet;
   }
 
 

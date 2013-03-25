@@ -58,7 +58,8 @@ class ConfigBuilder {
         outputWrapper,
         getModules(),
         getReplaces(),
-        preprocessCommand);
+        preprocessCommand,
+        isQuiet());
   }
 
 
@@ -268,7 +269,10 @@ class ConfigBuilder {
           processedReplaces.add(
               new Config.Replace(split[0], split[1]));
 
-          System.out.println("Replace: " + split[0] + " => " +  split[1]);
+          if (!isQuiet()) {
+            System.out.println("Replace: " + split[0] + " => " +  split[1]);
+          }
+
         } else {
           throw new RuntimeException(
               String.format(
@@ -279,6 +283,11 @@ class ConfigBuilder {
     }
 
     return processedReplaces;
+  }
+
+
+  private boolean isQuiet() {
+    return cmdLine.hasOption("quiet");
   }
 
 

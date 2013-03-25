@@ -54,6 +54,13 @@ public final class Main {
                 .create())
         .addOption(
             OptionBuilder
+                .withDescription(
+                    "do not print service messages to stdout " +
+                     "(like preprocessing commands)")
+                .withLongOpt("quiet")
+                .create())
+        .addOption(
+            OptionBuilder
                 .withDescription("print this message")
                 .withLongOpt("help")
                 .create("h"));

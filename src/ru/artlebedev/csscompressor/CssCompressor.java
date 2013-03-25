@@ -222,12 +222,19 @@ public class CssCompressor {
     final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
     executor.setStreamHandler(new PumpStreamHandler(stdout, stderr));
 
-    System.out.println(
-        String.format(
-            "INFO: executing preprocess command `%s`", expandedCommand));
+    if (!config.isQuiet()) {
+      System.out.println(
+          String.format(
+              "INFO: executing preprocess command `%s`", expandedCommand));
+    }
+
     try {
       executor.execute(commandLine);
-      System.out.println(stderr.toString());
+
+      String innerErrors = stderr.toString();
+      if (innerErrors != null && !innerErrors.equals("")) {
+        System.out.println(innerErrors);
+      }
 
     } catch (IOException e) {
       throw new RuntimeException(
