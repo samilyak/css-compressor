@@ -40,6 +40,8 @@ class ConfigBuilder {
 
   private String outputWrapper;
 
+  private String preprocessCommand;
+
 
   ConfigBuilder(CommandLine cmdLine) {
     this.cmdLine = cmdLine;
@@ -55,7 +57,8 @@ class ConfigBuilder {
         getCharset(),
         outputWrapper,
         getModules(),
-        getReplaces());
+        getReplaces(),
+        preprocessCommand);
   }
 
 
@@ -113,6 +116,10 @@ class ConfigBuilder {
 
   public void setOutputWrapper(String outputWrapper) {
     this.outputWrapper = outputWrapper;
+  }
+
+  public void setPreprocessCommand(String command) {
+    this.preprocessCommand = command;
   }
 
 
@@ -245,6 +252,7 @@ class ConfigBuilder {
     }
 
     return calculateFullPath(
+        // replace %s with a module name
         String.format(moduleOutput, moduleName));
   }
 

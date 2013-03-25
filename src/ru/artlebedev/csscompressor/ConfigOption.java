@@ -81,6 +81,16 @@ public enum ConfigOption {
           builder.setCharset(charset);
         }
       },
+      "UTF-8"),
+
+  PREPROCESS(
+      "preprocess", "string",
+      new Updater(){
+        @Override
+        public void update(String preprocessCommand, ConfigBuilder builder){
+          builder.setPreprocessCommand(preprocessCommand);
+        }
+      },
       "UTF-8")
   ;
 

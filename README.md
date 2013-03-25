@@ -46,6 +46,8 @@ Example of a config-json-file containing all possible options:
     }
   },
 
+  "preprocess": "sass %s",
+
   "output-path": "min/%s.build.css",
 
   "output-wrapper": [
@@ -79,6 +81,15 @@ A definition can be either a string, an array of strings, or an object:
    This option if presented will be used instead of global `output-path`.
 
 All paths are relative to global option `root`.
+
+
+<br />
+`preprocess` **string**, optional <br />
+A command to run for each module to preprocess css (e.g. SASS or LESS).
+%s inside string will be replaced with an input file path.
+Command must exit with a 0 exit code. Command stdout will be used as css string
+for further compressing, stderr will be printed to jar's stdout.
+Please note that command is run in a current catalog as a working directory.
 
 <br />
 `output-path` **string**, required if some modules are in format 1 or 2

@@ -24,19 +24,23 @@ class Config {
 
   private List<Replace> replaces;
 
+  private String preprocessCommand;
+
   
   Config(
       String rootPath,
       String charset,
       String outputWrapper,
       List<Module> modules,
-      List<Replace> replaces){
+      List<Replace> replaces,
+      String preprocessCommand){
     
     this.rootPath = rootPath;
     this.charset = charset;
     this.outputWrapper = outputWrapper;
     this.modules = modules;
     this.replaces = replaces;
+    this.preprocessCommand = preprocessCommand;
   }
 
   public String getRootPath() {
@@ -57,6 +61,10 @@ class Config {
 
   public List<Replace> getReplaces() {
     return replaces;
+  }
+
+  public String getPreprocessCommand() {
+    return preprocessCommand;
   }
 
 

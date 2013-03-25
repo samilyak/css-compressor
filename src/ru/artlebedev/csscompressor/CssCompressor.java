@@ -6,6 +6,12 @@
 
 package ru.artlebedev.csscompressor;
 
+import org.apache.commons.exec.CommandLine;
+import org.apache.commons.exec.DefaultExecutor;
+import org.apache.commons.exec.ExecuteWatchdog;
+import org.apache.commons.exec.PumpStreamHandler;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
@@ -60,7 +66,7 @@ public class CssCompressor {
     for (Config.Module module : config.getModules()) {
       prepareModuleOutputCatalog(module);
 
-      String css = concatCssFiles(module.inputs);
+      String css = concatCssFiles(module.inputs, true);
 
       com.yahoo.platform.yui.compressor.CssCompressor compressor =
           new com.yahoo.platform.yui.compressor.CssCompressor(
@@ -91,7 +97,7 @@ public class CssCompressor {
     }
   }
 
-  private String concatCssFiles(List<String> paths)
+  private String concatCssFiles(List<String> paths, boolean tryPreprocess)
       throws IOException {
 
     StringBuilder stringResult = new StringBuilder();
@@ -99,7 +105,7 @@ public class CssCompressor {
 
     for (String path : paths) {
       CssProcessingResult pathProcessingResult =
-          processCssFile(path, processedFiles);
+          processCssFile(path, processedFiles, tryPreprocess);
 
       stringResult.append(pathProcessingResult.content);
       processedFiles = pathProcessingResult.processedFiles;
@@ -141,7 +147,9 @@ public class CssCompressor {
 
 
   private CssProcessingResult processCssFile(
-      String path, List<String> processedFiles) throws IOException {
+      String path, List<String> processedFiles, boolean tryPreprocess)
+      throws IOException {
+
     /*
       We need to prevent from processing same files more than once,
       to minify result build file and more importantly to avoid cyclic imports.
@@ -159,7 +167,14 @@ public class CssCompressor {
 
     processedFiles.add(fileCanonicalPath);
 
-    String inputContent = Utils.readFile(path, config.getCharset());
+    String inputContent;
+    if (tryPreprocess && config.getPreprocessCommand() != null) {
+      inputContent =
+          preprocessAndGetOutput(config.getPreprocessCommand(), path);
+    } else {
+      inputContent = Utils.readFile(path, config.getCharset());
+    }
+
     Matcher matcher = cssImportPattern.matcher(inputContent);
 
     StringBuffer stringResult = new StringBuffer();
@@ -170,7 +185,7 @@ public class CssCompressor {
       if (!isCssImportAbsolute(importPath)) {
         File importFile = new File(fileCatalog, importPath);
         CssProcessingResult importProcessingResult =
-            processCssFile(importFile.getPath(), processedFiles);
+            processCssFile(importFile.getPath(), processedFiles, false);
 
         importFileContent = importProcessingResult.content;
       }
@@ -190,6 +205,38 @@ public class CssCompressor {
 
 
     return new CssProcessingResult(stringResult.toString(), processedFiles);
+  }
+
+
+  private String preprocessAndGetOutput(String command, String path)
+      throws IOException {
+
+    // replace %s with a file path
+    String expandedCommand = String.format(command, path);
+
+    CommandLine commandLine = CommandLine.parse(expandedCommand);
+
+    DefaultExecutor executor = new DefaultExecutor();
+    executor.setWatchdog(new ExecuteWatchdog(30 * 1000));
+    final ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+    final ByteArrayOutputStream stderr = new ByteArrayOutputStream();
+    executor.setStreamHandler(new PumpStreamHandler(stdout, stderr));
+
+    System.out.println(
+        String.format(
+            "INFO: executing preprocess command `%s`", expandedCommand));
+    try {
+      executor.execute(commandLine);
+      System.out.println(stderr.toString());
+
+    } catch (IOException e) {
+      throw new RuntimeException(
+          String.format("Preprocessing file %s failed.", path) +
+          "\n" + stderr.toString() +
+          "\n" + e.getMessage());
+    }
+
+    return stdout.toString();
   }
 
 
