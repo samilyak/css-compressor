@@ -231,7 +231,7 @@ public class CssCompressor {
     try {
       executor.execute(commandLine);
 
-      String innerErrors = stderr.toString();
+      String innerErrors = stderr.toString(config.getCharset());
       if (innerErrors != null && !innerErrors.equals("")) {
         System.out.println(innerErrors);
       }
@@ -239,11 +239,11 @@ public class CssCompressor {
     } catch (IOException e) {
       throw new RuntimeException(
           String.format("Preprocessing file %s failed.", path) +
-          "\n" + stderr.toString() +
+          "\n" + stderr.toString(config.getCharset()) +
           "\n" + e.getMessage());
     }
 
-    return stdout.toString();
+    return stdout.toString(config.getCharset());
   }
 
 
