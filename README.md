@@ -1,8 +1,3 @@
-## Downloads
-
-Latest binary version on SourceForge – [css-compressor-54b604.jar](http://sourceforge.net/projects/css-compressor/files/css-compressor-54b604.jar/download)
-
-
 ## Usage
 
 CSS Compressor based on YUI Compressor (its CSS related class
